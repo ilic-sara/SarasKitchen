@@ -1,0 +1,118 @@
+﻿@page "/"
+@inject IRecipeService RecipeService
+@inject ICategoryService CategoryService
+@inject ICuisineService CuisineService
+@inject IDietService DietService
+@inject IMethodService MethodService
+@inject ILogger<StartPage> Logger
+@rendermode InteractiveServer
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
+else if (loadError)
+{
+    <h3>Error loading the start page. Please try again later.</h3>
+}
+else
+{
+    <div class="image-container">
+        <img src="hero.png" class="hero-image">
+        <div class="overlay">
+            <span class="main-text">Sara's kitchen</span>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-10 col-xxl-9 welcome-div">
+            <h1 class="text-center my-3"> Welcome to Sara's kitchen </h1>
+            <p>
+                Discover the joy of cooking with Sara's Kitchen—your go-to destination for delicious, easy-to-follow recipes that bring flavor and variety to your dining table. 
+                Whether you're a seasoned chef or just starting out, our curated collection of recipes is designed to inspire your next meal.
+            </p>
+            <h3 class="text-center my-3 mt-5">Why Sara's kitchen?</h3>
+            <div class="row justify-content-center">
+                @{
+                    string text1 = "Explore a world of flavors with our extensive selection of recipes from various cuisines. " +
+                            "From Italian pastas to Indian curries, there's something for every palate.";
+
+                    <TextCard Heading="Diverse Cuisines" Text="@text1" />
+                }
+                @{
+                    string text2 = "Looking for something nutritious? " +
+                    "We've got you covered with a range of diets including keto, gluten-free, and vegetarian options.";
+
+                    <TextCard Heading="Healthy Choices" Text="@text2" />
+                }
+                @{
+                    string text3 = "Cooking should be fun, not frustrating!  " +
+                    "Our step-by-step instructions and ingredient lists make it easy to whip up something amazing.";
+
+                    <TextCard Heading="Easy to Follow" Text="@text3" />
+                }
+                @{
+                    string text4 = "Whether you're in the mood for grilling, baking, or air frying, find recipes tailored to your preferred cooking method.";
+
+                    <TextCard Heading="Cooking Methods" Text="@text4" />
+                }
+                
+            </div>
+        </div>
+        <div class="col-11 col-md-10 col-xxl-9 px-0">
+            <RecipeList Recipes="newestRecipes" Text="Newest recipes" DarkText="true"/>
+
+            <CategoryList Categories="@categories" DarkText="true" />
+
+            <CuisineList Cuisines="@cuisines" DarkText="true" />
+
+            <DietList Diets="@diets" DarkText="true" />
+
+            <MethodList Methods="@methods" DarkText="true" />
+        </div>
+    </div>
+}
+@code {
+
+    private List<Category> categories = [];
+    private List<Cuisine> cuisines = [];
+    private List<Diet> diets = [];
+    private List<Method> methods = [];
+    private List<Recipe> newestRecipes = [];
+    private bool isLoading = true;
+    private bool loadError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var categoriesTask = CategoryService.GetAllAsync();
+            var cuisinesTask = CuisineService.GetAllAsync();
+            var dietsTask = DietService.GetAllAsync();
+            var methodsTask = MethodService.GetAllAsync();
+            var recipesTask = RecipeService.GetNewestRecipes(0, 12);
+
+            await Task.WhenAll(categoriesTask, cuisinesTask, dietsTask, methodsTask, recipesTask);
+
+            categories = await categoriesTask;
+            cuisines = await cuisinesTask;
+            diets = await dietsTask;
+            methods = await methodsTask;
+            newestRecipes = await recipesTask;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "An error occurred while loading initial data.");
+            loadError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    
+    }
+}
