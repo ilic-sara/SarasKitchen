@@ -50,11 +50,12 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           policy.WithOrigins("https://localhost:7227",
-                                              "https://localhost:53746",
-                                              "https://localhost:53747")
-                                            .AllowAnyHeader()
-                                            .AllowAnyMethod()
-                                            .AllowCredentials();
+                                             "https://localhost:30227",
+                                             "https://localhost:53746",
+                                             "https://localhost:53747")
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod()
+                                 .AllowCredentials();
                       });
 });
 

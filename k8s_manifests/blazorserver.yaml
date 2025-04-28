@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: blazorserver-service
+spec:
+  type: NodePort
+  selector:
+    app: blazorserver-app
+  ports:
+    - port: 7227
+      targetPort: 7227
+      nodePort: 30227
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blazorserver-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blazorserver-app
+  template:
+    metadata:
+      labels:
+        app: blazorserver-app
+    spec:
+      containers:
+        - name: blazorserver-container
+          image: saraskitchen-blazorserver:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 7227
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Docker
+          volumeMounts:
+            - name: cert-volume
+              mountPath: /https
+              readOnly: true
+      volumes:
+        - name: cert-volume
+          secret:
+            secretName: https-cert
