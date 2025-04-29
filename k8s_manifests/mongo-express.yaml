@@ -34,6 +34,12 @@ spec:
             - name: ME_CONFIG_MONGODB_URL
               value: "mongodb://mongodb-statefulset-0.mongodb:27017/?replicaSet=rs0"
             - name: ME_CONFIG_BASICAUTH_USERNAME
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-express-secret
+                  key: username
             - name: ME_CONFIG_BASICAUTH_PASSWORD
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-express-secret
+                  key: password
